@@ -6,7 +6,7 @@ IMG_PATH = "img/"
 
 
 def load_image(path):
-    return pygame.image.load(IMG_PATH + path).convert
+    return pygame.image.load(IMG_PATH + path).convert()
 
 
 def load_images(path):
