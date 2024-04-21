@@ -3,7 +3,7 @@ import sys
 
 from sprites import PhysicsEntity
 from tilemap import Tilemap
-from utils import load_images, load_image, Animation
+from utils import load_images
 
 WIN_WIDTH = 640
 WIND_HEIGHT = 480

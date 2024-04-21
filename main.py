@@ -1,7 +1,7 @@
 import pygame
 import sys
 from sprites import PhysicsEntity
-from utils import load_images, load_image, Animation
+from utils import load_images, Animation
 WIN_WIDTH = 640
 WIND_HEIGHT = 480
 
