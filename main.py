@@ -1,7 +1,8 @@
 import pygame
 import sys
-from sprites import PhysicsEntity
+from sprites import PhysicsEntity, Player
 from utils import load_images, Animation
+from tilemap import Tilemap
 WIN_WIDTH = 640
 WIND_HEIGHT = 480
 
@@ -15,18 +16,41 @@ class Game:
         self.running = True
         self.movement = [0, 0, 0, 0]
         self.scroll = [0, 0]
-        self.player = PhysicsEntity(self, [0, 0], (32, 32))
+        
         self.clock = pygame.time.Clock()
         self.assets = {
+            "blocks/wood":load_images("blocks/wood"),
             'player/walk': Animation(load_images('player/walk')),
+            'player/iddle': Animation(load_images('player/iddle')),
+            'player/walk_back': Animation(load_images('player/walk_back')),
+            'player/iddle_back': Animation(load_images('player/iddle_back')),
         }
+        self.player = Player(self, [114, 97], (32, 32))
+        self.tilemap = Tilemap(self, 16)
+        self.test_spawners = []
+
+        try:
+            self.tilemap.load('map.json')
+        except FileNotFoundError:
+            pass
+
+    def load_level(self):
+        self.tilemap.load('map.json')
+        for wood in self.tilemap.extract([('wood', 1)], keep = True):
+            self.test_spawners.append(pygame.Rect(4+wood['pos'][0], 4 + wood['pos'][1], 23, 13))
+
+        
+
 
     def run(self):
         while self.running:
             self.display.fill((155, 155, 155))
 
+            self.tilemap.render(self.display, offset=(0,0))
+
             self.player.update(
-                (
+                self.tilemap, 
+                (   
                     self.movement[0] - self.movement[1],
                     self.movement[2] - self.movement[3],
                 )
