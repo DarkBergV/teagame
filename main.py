@@ -25,8 +25,8 @@ class Game:
             'player/walk_back': Animation(load_images('player/walk_back')),
             'player/iddle_back': Animation(load_images('player/iddle_back')),
         }
-        self.player = Player(self, [114, 97], (32, 32))
-        self.tilemap = Tilemap(self, 16)
+        self.player = Player(self, [114, 97], (18, 18))
+        self.tilemap = Tilemap(self, 18)
         self.test_spawners = []
 
         try:
@@ -46,7 +46,11 @@ class Game:
         while self.running:
             self.display.fill((155, 155, 155))
 
-            self.tilemap.render(self.display, offset=(0,0))
+            self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0] )/ 30
+            self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1] )/ 30
+
+            render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
+            self.tilemap.render(self.display, offset=self.scroll)
 
             self.player.update(
                 self.tilemap, 
@@ -55,7 +59,7 @@ class Game:
                     self.movement[2] - self.movement[3],
                 )
             )
-            self.player.render(self.display, offset=(0, 0))
+            self.player.render(self.display, offset=render_scroll)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -63,7 +67,6 @@ class Game:
                     sys.exit
 
                 keys = pygame.key.get_pressed()
-
                 if keys[pygame.K_d]:
                     self.movement[0] = True
                 elif keys[pygame.K_a]:
@@ -81,7 +84,6 @@ class Game:
                     self.movement[2] = False
                     self.movement[3] = False
 
-            print(self.movement)
             self.screen.blit(
                 pygame.transform.scale(self.display, self.screen.get_size()), [0, 0]
             )

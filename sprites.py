@@ -1,3 +1,4 @@
+import re
 from shutil import move
 import pygame
 
@@ -35,35 +36,41 @@ class PhysicsEntity(pygame.sprite.Sprite):
         ]
 
         entity_rect = self.rect()
-        
+        print(frame_movement)
         self.pos[0] += frame_movement[0]
         for rect in tilemap.physics_rect_around(self.pos):
+            
             if entity_rect.colliderect(rect):
-                if frame_movement[0]>0:
-                    entity_rect.right = rect.left
-                    self.collision['right'] = True
-
-                if frame_movement[0]<0:
+                if frame_movement[0] < 0:
+                    #self.pos[0] = entity_rect.x
+                    #self.pos[1] = self.pos[1]
                     entity_rect.left = rect.right
-                    self.collision['left'] = True
+
+               
+                elif frame_movement[0]>0:
+                    entity_rect.right = rect.left
 
                 self.pos[0] = entity_rect.x
 
+                
+        entity_rect = self.rect()
         self.pos[1] += frame_movement[1]
 
         for rect in tilemap.physics_rect_around(self.pos):
-            print('ashdoiasdoj')
+            
             if entity_rect.colliderect(rect):
                 
                 if frame_movement[1]>0:
                     entity_rect.bottom = rect.top
-                    self.collision['down'] = True
 
-                if frame_movement[1]<0:
+                elif frame_movement[1]<0:
+                    #entity_rect.top = rect.bottom
+                    #self.collision['up'] = True
+                    #self.pos[1] = entity_rect.y
+                    #print("up")
                     entity_rect.top = rect.bottom
-                    self.collision['up'] = True
 
-                self.pos[1] = entity_rect.y
+                self.pos[1] = entity_rect.y 
 
         if movement[0] > 0:
             self.flip = True
