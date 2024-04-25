@@ -14,7 +14,8 @@ class Tilemap:
 
     def extract(self, id_pairs, keep=False):
         matches = []
-
+        loc_to_del = []
+        count = 0
         for tile in self.offgrid_tiles.copy():
             if (tile["type"], tile["variant"]) in id_pairs:
                 matches.append(tile.copy())
@@ -23,8 +24,9 @@ class Tilemap:
                     self.offgrid_tiles.remove(tile)
 
         for loc in self.tilemap:
+            print(count)
             tile = self.tilemap[loc]
-
+            count+=1
             if (tile["type"], tile["variant"]) in id_pairs:
                 matches.append(tile.copy())
                 matches[-1]["pos"] = matches[-1]["pos"].copy()
@@ -32,7 +34,11 @@ class Tilemap:
                 matches[-1]["pos"][1] *= self.tile_size
 
                 if not keep:
-                    del self.tilemap[loc]
+                    print(id_pairs)
+                    loc_to_del.append(loc)
+        for loc in loc_to_del:
+            del self.tilemap[loc]
+                    
 
         matches = sorted(matches, key=lambda d: d["variant"])
         return matches
@@ -78,7 +84,7 @@ class Tilemap:
         rects = []
         
         for tile in self.tiles_around(pos):
-            print(tile['type'])
+           
             if tile["type"] in PHYSICS_TILES:
 
                 rects.append(
@@ -89,7 +95,7 @@ class Tilemap:
                         self.tile_size,
                     )
                 )
-        print(rects)
+        
         return rects
 
     def solid_check(self, pos):
@@ -101,7 +107,7 @@ class Tilemap:
 
     def render(self, surf, offset=(0, 0)):
         for tile in self.offgrid_tiles:
-            print(tile["pos"])
+            
             surf.blit(
                 self.game.assets[tile["type"]][tile["variant"]],
                 (tile["pos"][0] - offset[0], tile["pos"][1] - offset[1]),

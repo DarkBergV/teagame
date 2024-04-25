@@ -12,7 +12,6 @@ class PhysicsEntity(pygame.sprite.Sprite):
         self.velocity = [0, 0]
         self.collision = {"up": False, "down": False, "left": False, "right": False}
         self.flip = False
-        print(self.size)
         self.display = pygame.surface.Surface(self.size)
         self.display.fill((198, 55, 32))
         self.action = ''
@@ -36,7 +35,7 @@ class PhysicsEntity(pygame.sprite.Sprite):
         ]
 
         entity_rect = self.rect()
-        print(frame_movement)
+        
         self.pos[0] += frame_movement[0]
         for rect in tilemap.physics_rect_around(self.pos):
             
@@ -44,33 +43,39 @@ class PhysicsEntity(pygame.sprite.Sprite):
                 if frame_movement[0] < 0:
                     #self.pos[0] = entity_rect.x
                     #self.pos[1] = self.pos[1]
-                    entity_rect.left = rect.right
-
+                    
+                    entity_rect.left = rect.right - entity_rect.width
                
-                elif frame_movement[0]>0:
-                    entity_rect.right = rect.left
+                if frame_movement[0]>0:
+                    
+                    entity_rect.right = rect.left 
+             
 
-                self.pos[0] = entity_rect.x
+            self.pos[0] = entity_rect.x
+
 
                 
-        entity_rect = self.rect()
+        entity_rect_y = self.rect()
         self.pos[1] += frame_movement[1]
+        
 
         for rect in tilemap.physics_rect_around(self.pos):
             
-            if entity_rect.colliderect(rect):
+            if entity_rect_y.colliderect(rect):
+                
                 
                 if frame_movement[1]>0:
-                    entity_rect.bottom = rect.top
+                    entity_rect_y.bottom = rect.top
 
-                elif frame_movement[1]<0:
-                    #entity_rect.top = rect.bottom
-                    #self.collision['up'] = True
-                    #self.pos[1] = entity_rect.y
-                    #print("up")
-                    entity_rect.top = rect.bottom
+                if frame_movement[1]<0:
+                    entity_rect_y.top = rect.bottom
 
-                self.pos[1] = entity_rect.y 
+            self.pos[1] = entity_rect_y.y
+                    
+                    
+                    
+
+                
 
         if movement[0] > 0:
             self.flip = True
@@ -85,7 +90,29 @@ class PhysicsEntity(pygame.sprite.Sprite):
 
 
 
+
+class MovableObject(pygame.sprite.Sprite):
+    def __init__(self, game, e_type, pos, size):
+        self.game = game
+        self.e_type = e_type
+        self.pos = pos
+        self.size = size
+        
+        
+
+
+    def rect(self):
+        return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
+    
+
+    def render(self, surf, offset=(0,0)):
+        self.img = self.game.assets["tea/" + self.e_type].copy()
+        surf.blit(self.img, (self.pos[0] - offset[0], self.pos[1] - offset[1]) )
+
+
+
 class Player(PhysicsEntity):
+
     def __init__(self, game, pos, size,):
         super().__init__(game, 'player', pos, size,)
 
@@ -111,3 +138,13 @@ class Player(PhysicsEntity):
 
 
         super().update(tilemap, movement=movement)
+
+
+
+
+class Flower(MovableObject):
+    def __init__(self, game, pos, size):
+        super().__init__(game,'camomila', pos, size)
+       
+
+
