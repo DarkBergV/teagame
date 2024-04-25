@@ -17,9 +17,10 @@ class PhysicsEntity(pygame.sprite.Sprite):
         self.action = ''
         self.set_action('walk')
         self.back = False
+      
         
         self.anim_offset = (-3,-3)
-
+        self.mov= [0,0]
     def set_action(self, action):
         if action != self.action:
             self.action = action
@@ -33,6 +34,9 @@ class PhysicsEntity(pygame.sprite.Sprite):
             movement[0] + self.velocity[0],
             movement[1] + self.velocity[1],
         ]
+
+        self.mov[0] =  frame_movement[0]
+        self.mov[1] =  frame_movement[1]
 
         entity_rect = self.rect()
         
@@ -102,7 +106,7 @@ class MovableObject(pygame.sprite.Sprite):
 
 
     def rect(self):
-        return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
+        return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
     
 
     def render(self, surf, offset=(0,0)):
@@ -136,15 +140,44 @@ class Player(PhysicsEntity):
         elif movement[1] == 0 and self.back:
             self.set_action('iddle_back')
 
-
+        tea_rects = [tea for tea in self.game.items]
+        for tea in tea_rects:
+            rect = tea.rect()
+            if self.rect().colliderect(rect):
+                if self.mov[0] > 0:
+                    self.pos[0] = rect.left - self.rect().width
+                    tea.pos[0] +=1  
+                elif self.mov[0] < 0:
+                    self.pos[0] = rect.right
+                    tea.pos[0] -=1  
+                    
+                if self.mov[1] > 0:
+                    self.pos[1] = rect.top - self.rect().height  
+                    tea.pos[1] +=1 
+                elif self.mov[1] < 0:
+                    self.pos[1] = rect.bottom
+                    tea.pos[1] -=1 
+                
+                
+        
         super().update(tilemap, movement=movement)
+    
+    def collect_items(self):
+        tea_rects = [tea for tea in self.game.items]
+        for item in tea_rects:
+            item.move_item()
+            
 
 
 
 
 class Flower(MovableObject):
-    def __init__(self, game, pos, size):
-        super().__init__(game,'camomila', pos, size)
+    def __init__(self,game,e_type, pos, size):
+        super().__init__(game,e_type, pos, size)
+    def move_item(self):
+        print(self.game.player.rect())
+        
+        self.pos[0] += 1
        
 
 

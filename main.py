@@ -22,6 +22,7 @@ class Game:
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
+            'tea/chaleira':load_image('items/chaleira/chaleira.png'),
             'tea/camomila':load_image('items/tea/camomila.png'),
             "blocks/wood":load_images("blocks/wood"),
             'player/walk': Animation(load_images('player/walk')),
@@ -32,20 +33,24 @@ class Game:
         self.player = Player(self, [114, 97], (18, 18))
         self.tilemap = Tilemap(self, 18)
         self.test_spawners = []
-        
+        self.items = []
+        self.space = False
         self.load_level()
 
     def load_level(self):
         self.tilemap.load('map.json')
         for wood in self.tilemap.extract([('wood', 1)], keep = True):
             self.test_spawners.append(pygame.Rect(4 + wood['pos'][0], 4 + wood['pos'][1], 23, 13))
-        self.items = []
-        for spawner in self.tilemap.extract([('spawner',0), ('spawner',3)]):
+        
+        for spawner in self.tilemap.extract([('spawner',0),('spawner',1), ('spawner',3)]):
             if spawner['variant'] == 3:
                 self.player.pos = spawner["pos"]
             if spawner['variant'] == 0:
                 
-                self.items.append(Flower(self, spawner["pos"], (18,18)))
+                self.items.append(Flower(self,'camomila', spawner["pos"], (18,18)))
+            if spawner['variant'] == 1:
+                
+                self.items.append(Flower(self,'chaleira', spawner["pos"], (18,18)))
                 
                 
 
@@ -103,8 +108,8 @@ class Game:
 
                 elif keys[pygame.K_s]:
                     self.movement[2] = True
-
-               
+                
+                
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_d:
                         self.movement[0] = False
@@ -116,6 +121,10 @@ class Game:
 
                     elif event.key == pygame.K_s:
                         self.movement[2] = False
+                    
+                    elif event.key == pygame.K_SPACE:
+                        self.space = not self.space
+                        print(self.space)
 
 
             self.screen.blit(
