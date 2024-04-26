@@ -2,7 +2,7 @@ from json import load
 from turtle import pos
 import pygame
 import sys
-from sprites import PhysicsEntity, Player, Flower
+from sprites import PhysicsEntity, Player, Flower, Tea
 from utils import load_images, Animation, load_image
 from tilemap import Tilemap
 import datetime
@@ -17,11 +17,13 @@ class Game:
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIND_HEIGHT))
         self.display = pygame.surface.Surface((WIN_WIDTH // 2, WIND_HEIGHT // 2))
         self.running = True
+        
         self.movement = [0, 0, 0, 0]
         self.scroll = [0, 0]
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
+            'tea/tea_cup':load_image('items/cup/tea_cup.png'),
             'tea/chaleira':load_image('items/chaleira/chaleira.png'),
             'tea/camomila':load_image('items/tea/camomila.png'),
             "blocks/wood":load_images("blocks/wood"),
@@ -47,10 +49,10 @@ class Game:
                 self.player.pos = spawner["pos"]
             if spawner['variant'] == 0:
                 
-                self.items.append(Flower(self,'camomila', spawner["pos"], (18,18)))
+                self.items.append(Flower(self,'camomila', spawner["pos"], (32,32)))
             if spawner['variant'] == 1:
                 
-                self.items.append(Flower(self,'chaleira', spawner["pos"], (18,18)))
+                self.items.append(Flower(self,'chaleira', spawner["pos"], (30,32)))
                 
                 
 
@@ -73,7 +75,15 @@ class Game:
 
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
             for i in self.items:
-                i.render(self.display, offset=render_scroll)
+                i.render(self.display, offset=(render_scroll))
+                make_tea = i.update()
+                if make_tea:
+                    tea = Tea(self, 'tea_cup', i.pos,(32,32))
+                    tea.render(self.display, offset=self.scroll)
+
+
+              
+                
             timer = self.font.render("timer : " + f"{(':'.join(str(clock).split(':')[1:4]))}", True, (0,0,0))
             
 
@@ -108,6 +118,9 @@ class Game:
 
                 elif keys[pygame.K_s]:
                     self.movement[2] = True
+
+                elif keys[pygame.K_SPACE]:
+                    self.space = True
                 
                 
                 if event.type == pygame.KEYUP:
@@ -123,7 +136,7 @@ class Game:
                         self.movement[2] = False
                     
                     elif event.key == pygame.K_SPACE:
-                        self.space = not self.space
+                        self.space = False
                         print(self.space)
 
 

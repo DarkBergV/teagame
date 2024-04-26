@@ -1,6 +1,5 @@
-import re
-from shutil import move
 import pygame
+
 
 
 class PhysicsEntity(pygame.sprite.Sprite):
@@ -110,9 +109,13 @@ class MovableObject(pygame.sprite.Sprite):
     
 
     def render(self, surf, offset=(0,0)):
+        rect = self.rect().center
         self.img = self.game.assets["tea/" + self.e_type].copy()
-        surf.blit(self.img, (self.pos[0] - offset[0], self.pos[1] - offset[1]) )
+        rect = self.pos
+        surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]) )
 
+    def update(self):
+        pass
 
 
 class Player(PhysicsEntity):
@@ -146,17 +149,20 @@ class Player(PhysicsEntity):
             if self.rect().colliderect(rect):
                 if self.mov[0] > 0:
                     self.pos[0] = rect.left - self.rect().width
-                    tea.pos[0] +=1  
+                    tea.pos[0] +=0.5
+
                 elif self.mov[0] < 0:
                     self.pos[0] = rect.right
-                    tea.pos[0] -=1  
+                    tea.pos[0] -=0.5   
                     
                 if self.mov[1] > 0:
                     self.pos[1] = rect.top - self.rect().height  
-                    tea.pos[1] +=1 
+                    tea.pos[1] +=0.5  
                 elif self.mov[1] < 0:
                     self.pos[1] = rect.bottom
-                    tea.pos[1] -=1 
+                    tea.pos[1] -=0.5
+
+
                 
                 
         
@@ -178,6 +184,33 @@ class Flower(MovableObject):
         print(self.game.player.rect())
         
         self.pos[0] += 1
+
+    def update(self):
+        items = [item for item in self.game.items]
+        for item in items:
+            if self.rect().colliderect(item.rect()) and item.e_type != self.e_type:
+                return True
+
+        super().update()
+    
+        
        
+
+
+class Tea(MovableObject):
+    def __init__(self, game, e_type, pos, size):
+        super().__init__(game, e_type, pos, size)
+
+      
+
+    
+    
+    def render(self, surf, offset=(0,0)):
+        rect = self.rect().center
+        self.img = self.game.assets["tea/" + self.e_type].copy()
+        rect = self.pos
+        surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
+
+
 
 
