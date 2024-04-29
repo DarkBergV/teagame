@@ -1,3 +1,4 @@
+from itertools import count
 from json import load
 from turtle import pos
 import pygame
@@ -8,6 +9,7 @@ from tilemap import Tilemap
 import datetime
 WIN_WIDTH = 640
 WIND_HEIGHT = 480
+
 
 
 class Game:
@@ -23,9 +25,11 @@ class Game:
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
-            'tea/tea_cup':load_image('items/cup/tea_cup.png'),
+            'tea/tea_cup/mint':load_image('items/cup/tea_protag_iddle_back1.png'),
+            'tea/tea_cup/camomila':load_image('items/cup/tea_cup.png'),
             'tea/chaleira':load_image('items/chaleira/chaleira.png'),
             'tea/camomila':load_image('items/tea/camomila.png'),
+            'tea/mint':load_image('items/tea/mint.png'),
             "blocks/wood":load_images("blocks/wood"),
             'player/walk': Animation(load_images('player/walk')),
             'player/iddle': Animation(load_images('player/iddle')),
@@ -36,7 +40,11 @@ class Game:
         self.tilemap = Tilemap(self, 18)
         self.test_spawners = []
         self.items = []
+        
         self.space = False
+        self.tea_pos = (0,0)
+        self.flavor = ""
+        self.make_tea = False
         self.load_level()
 
     def load_level(self):
@@ -44,15 +52,21 @@ class Game:
         for wood in self.tilemap.extract([('wood', 1)], keep = True):
             self.test_spawners.append(pygame.Rect(4 + wood['pos'][0], 4 + wood['pos'][1], 23, 13))
         
-        for spawner in self.tilemap.extract([('spawner',0),('spawner',1), ('spawner',3)]):
-            if spawner['variant'] == 3:
-                self.player.pos = spawner["pos"]
+        for spawner in self.tilemap.extract([('spawner',0),('spawner',1), ('spawner',2), ('spawner',3)]):
+            
             if spawner['variant'] == 0:
                 
                 self.items.append(Flower(self,'camomila', spawner["pos"], (32,32)))
             if spawner['variant'] == 1:
                 
                 self.items.append(Flower(self,'chaleira', spawner["pos"], (30,32)))
+            
+            
+            if spawner['variant'] == 2:
+                self.items.append(Flower(self,'mint', spawner["pos"], (30,32)))
+
+            if spawner['variant'] == 3:
+                self.player.pos = spawner["pos"]
                 
                 
 
@@ -75,11 +89,24 @@ class Game:
 
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
             for i in self.items:
+                
                 i.render(self.display, offset=(render_scroll))
                 make_tea = i.update()
+                
+
                 if make_tea:
-                    tea = Tea(self, 'tea_cup', i.pos,(32,32))
-                    tea.render(self.display, offset=self.scroll)
+                    self.make_tea = True
+                    
+                    if len(self.items) == 0:
+                        break
+
+            print(len(self.items))
+
+            if self.make_tea:
+                tea = Tea(self, 'tea_cup', self.tea_pos,(32,32), self.flavor)
+                tea.render(self.display, self.scroll)
+                self.items.append(tea)
+                self.make_tea = False
 
 
               

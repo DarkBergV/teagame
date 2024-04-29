@@ -1,6 +1,8 @@
+from os import remove
 import pygame
 
-
+ITEM_MAKER = ['camomila', 'chaleira', 'mint']
+TEA_FLAVORS = ['camomila', 'mint']
 
 class PhysicsEntity(pygame.sprite.Sprite):
     def __init__(self, game, e_type, pos, size, ):
@@ -187,19 +189,36 @@ class Flower(MovableObject):
 
     def update(self):
         items = [item for item in self.game.items]
+        
         for item in items:
-            if self.rect().colliderect(item.rect()) and item.e_type != self.e_type:
+            
+            if self.rect().colliderect(item.rect()) and self.e_type != item.e_type and self.e_type in ITEM_MAKER and self.e_type in ITEM_MAKER:
+                
+                self.game.items.remove(item)
+                for j in self.game.items:
+                    if j.pos == self.pos:
+                        self.game.items.remove(j)
+                if self.e_type in TEA_FLAVORS:
+                    print(self.e_type)
+                    self.game.flavor = self.e_type
+                if item.e_type in TEA_FLAVORS:
+                    self.game.flavor = item.e_type
+
+                self.game.tea_pos = item.pos
                 return True
 
         super().update()
     
+
+
         
        
 
 
 class Tea(MovableObject):
-    def __init__(self, game, e_type, pos, size):
+    def __init__(self, game, e_type, pos, size, flavor):
         super().__init__(game, e_type, pos, size)
+        self.flavor = flavor
 
       
 
@@ -207,7 +226,8 @@ class Tea(MovableObject):
     
     def render(self, surf, offset=(0,0)):
         rect = self.rect().center
-        self.img = self.game.assets["tea/" + self.e_type].copy()
+        print(self.flavor)
+        self.img = self.game.assets["tea/" + self.e_type + "/" + self.flavor].copy()
         rect = self.pos
         surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
 
