@@ -1,8 +1,13 @@
 from os import remove
+from pkgutil import iter_modules
 import pygame
 
+
 ITEM_MAKER = ['camomila', 'chaleira', 'mint']
+
 TEA_FLAVORS = ['camomila', 'mint']
+
+ITEM_LIST = ['flavor', 'chaleira']
 
 class PhysicsEntity(pygame.sprite.Sprite):
     def __init__(self, game, e_type, pos, size, ):
@@ -97,12 +102,12 @@ class PhysicsEntity(pygame.sprite.Sprite):
 
 
 class MovableObject(pygame.sprite.Sprite):
-    def __init__(self, game, e_type, pos, size):
+    def __init__(self, game, e_type, item_type, pos, size):
         self.game = game
         self.e_type = e_type
         self.pos = pos
         self.size = size
-        
+        self.item_type = item_type
         
 
 
@@ -180,8 +185,8 @@ class Player(PhysicsEntity):
 
 
 class Flower(MovableObject):
-    def __init__(self,game,e_type, pos, size):
-        super().__init__(game,e_type, pos, size)
+    def __init__(self,game,e_type,item_type, pos, size):
+        super().__init__(game,e_type,item_type, pos, size)
     def move_item(self):
         print(self.game.player.rect())
         
@@ -192,7 +197,7 @@ class Flower(MovableObject):
         
         for item in items:
             
-            if self.rect().colliderect(item.rect()) and self.e_type != item.e_type and self.e_type in ITEM_MAKER and self.e_type in ITEM_MAKER:
+            if self.rect().colliderect(item.rect()) and self.e_type != item.e_type and self.e_type in ITEM_MAKER and self.e_type in ITEM_MAKER and self.item_type != item.item_type and self.item_type in ITEM_LIST and item.item_type in ITEM_LIST:
                 
                 self.game.items.remove(item)
                 for j in self.game.items:
@@ -216,8 +221,8 @@ class Flower(MovableObject):
 
 
 class Tea(MovableObject):
-    def __init__(self, game, e_type, pos, size, flavor):
-        super().__init__(game, e_type, pos, size)
+    def __init__(self, game, e_type,item_type, pos, size, flavor):
+        super().__init__(game, e_type,item_type, pos, size)
         self.flavor = flavor
 
       
@@ -226,10 +231,46 @@ class Tea(MovableObject):
     
     def render(self, surf, offset=(0,0)):
         rect = self.rect().center
-        print(self.flavor)
+        
         self.img = self.game.assets["tea/" + self.e_type + "/" + self.flavor].copy()
         rect = self.pos
         surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
 
 
 
+class Order(pygame.sprite.Sprite):
+    def __init__(self,game,pos, size, flavor):
+        self.game = game
+        self.pos = pos
+        self.size = size
+        self.flavor = flavor
+
+    def rect(self):
+        print("yay")
+        return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
+    
+    def update(self):
+        items = [item for item in self.game.items]
+        
+        for item in items:
+            
+            if self.rect().colliderect(item.rect()) and  item.item_type == 'tea' and item.flavor == self.flavor:
+                print("amongus")
+                self.game.items.remove(item)
+                for j in self.game.items:
+                    if j.pos == self.pos:
+                        self.game.items.remove(j)
+
+                self.game.tea_pos = item.pos
+                return True
+    
+
+    def render(self, surf, offset = (0,0)):
+        self.img = self.game.assets['order/' + self.flavor].copy()
+        rect = self.rect()
+        surf.blit(self.img, (rect[0]-offset[0], rect[1] - offset[1]))
+
+    
+
+
+        

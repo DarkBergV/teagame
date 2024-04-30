@@ -1,15 +1,12 @@
-from itertools import count
-from json import load
-from turtle import pos
 import pygame
 import sys
-from sprites import PhysicsEntity, Player, Flower, Tea
+from sprites import PhysicsEntity, Player, Flower, Tea, Order
 from utils import load_images, Animation, load_image
 from tilemap import Tilemap
 import datetime
 WIN_WIDTH = 640
 WIND_HEIGHT = 480
-
+ORDERS = ['camomila', 'mint', 'mix']
 
 
 class Game:
@@ -25,6 +22,9 @@ class Game:
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
+            'order/camomila':load_image('orders/camomila_order.png'),
+            'order/mint':load_image('orders/mint_order.png'),
+            'order/mix':load_image('orders/mix_order.png'),
             'scenario/carpet':load_images('blocks/scenario'),
             'tea/tea_cup/mint':load_image('items/cup/tea_protag_iddle_back1.png'),
             'tea/tea_cup/camomila':load_image('items/cup/tea_cup.png'),
@@ -39,8 +39,10 @@ class Game:
         }
         self.player = Player(self, [114, 97], (18, 18))
         self.tilemap = Tilemap(self, 18)
+        self.order = Order(self, [55,55], [32,32], 'mint')
         self.test_spawners = []
         self.items = []
+        self.tea = []
         
         self.space = False
         self.tea_pos = (0,0)
@@ -59,14 +61,14 @@ class Game:
             
             if spawner['variant'] == 0:
                 
-                self.items.append(Flower(self,'camomila', spawner["pos"], (32,32)))
+                self.items.append(Flower(self,'camomila','flavor', spawner["pos"], (32,32)))
             if spawner['variant'] == 1:
                 
-                self.items.append(Flower(self,'chaleira', spawner["pos"], (30,32)))
+                self.items.append(Flower(self,'chaleira','chaleira', spawner["pos"], (30,32)))
             
             
             if spawner['variant'] == 2:
-                self.items.append(Flower(self,'mint', spawner["pos"], (30,32)))
+                self.items.append(Flower(self,'mint','flavor', spawner["pos"], (30,32)))
 
             if spawner['variant'] == 3:
                 self.player.pos = spawner["pos"]
@@ -106,7 +108,7 @@ class Game:
          
       
             if self.make_tea:
-                tea = Tea(self, 'tea_cup', self.tea_pos,(32,32), self.flavor)
+                tea = Tea(self, 'tea_cup', 'tea',self.tea_pos,(32,32), self.flavor)
                 tea.render(self.display, self.scroll)
                 self.items.append(tea)
                 self.make_tea = False
@@ -126,6 +128,9 @@ class Game:
             )
             self.player.render(self.display, offset=render_scroll)
 
+            self.order.update()
+
+            self.order.render(self.display, offset=render_scroll)
             
 
             for event in pygame.event.get():

@@ -31,7 +31,7 @@ class Editor:
         self.tilemap = Tilemap(self, 18)
 
         try:
-            self.tilemap.load('another_room.json')
+            self.tilemap.load('map.json')
         except FileNotFoundError:
             pass
         
@@ -165,7 +165,7 @@ class Editor:
                 elif keys[pygame.K_LSHIFT]:
                     self.shift = True
                 elif keys[pygame.K_o]:
-                    self.tilemap.save('another_room.json')
+                    self.tilemap.save('map.json')
 
                 
 
