@@ -246,7 +246,7 @@ class Order(pygame.sprite.Sprite):
         self.flavor = flavor
 
     def rect(self):
-        print("yay")
+        
         return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
     
     def update(self):

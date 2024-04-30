@@ -1,3 +1,4 @@
+import random
 import pygame
 import sys
 from sprites import PhysicsEntity, Player, Flower, Tea, Order
@@ -6,19 +7,20 @@ from tilemap import Tilemap
 import datetime
 WIN_WIDTH = 640
 WIND_HEIGHT = 480
-ORDERS = ['camomila', 'mint', 'mix']
+ORDERS = ['camomila', 'mint']
 
 
 class Game:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("cozy spring game")
+
+        #display items
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIND_HEIGHT))
         self.display = pygame.surface.Surface((WIN_WIDTH // 2, WIND_HEIGHT // 2))
         self.running = True
         
-        self.movement = [0, 0, 0, 0]
-        self.scroll = [0, 0]
+        
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
@@ -37,18 +39,41 @@ class Game:
             'player/walk_back': Animation(load_images('player/walk_back')),
             'player/iddle_back': Animation(load_images('player/iddle_back')),
         }
+
+        #player
         self.player = Player(self, [114, 97], (18, 18))
+        self.movement = [0, 0, 0, 0]
+        self.scroll = [0, 0]
+
+
+
         self.tilemap = Tilemap(self, 18)
-        self.order = Order(self, [55,55], [32,32], 'mint')
+
+        #order items
         self.test_spawners = []
         self.items = []
         self.tea = []
-        
-        self.space = False
         self.tea_pos = (0,0)
         self.flavor = ""
         self.make_tea = False
+        self.num_orders = 3
+        self.orders_made = []
+
+        #score items
+        self.points = 0
+
+        #may use it eventually
+        self.space = False
+        
         self.load_level()
+        self.load_order()
+
+    def load_order(self):
+        for _ in range(self.num_orders):
+                x = random.randrange(201, 244)
+                y = random.randrange(77, 208)
+                flavor = random.choice(ORDERS)
+                self.orders_made.append(Order(self, [x,y], [32,32], flavor))
 
     def load_level(self):
         self.tilemap.load('map.json')
@@ -78,6 +103,7 @@ class Game:
 
     def run(self):
         while self.running:
+            #time logic
             timepassed = pygame.time.get_ticks()
             
             clock = datetime.timedelta(seconds=(240 - (timepassed//1000)))
@@ -85,20 +111,23 @@ class Game:
                 
                 pygame.quit()
 
+            timer = self.font.render("timer : " + f"{(':'.join(str(clock).split(':')[1:4]))}", True, (0,0,0))
+
+            #display logic
             self.display.fill((155, 155, 155))
             self.tilemap.render(self.display, offset=self.scroll)
-           
-
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0] )/ 30
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1] )/ 30
 
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
+
+            #displays ingrediants for making tea
             for i in self.items:
                 
                 i.render(self.display, offset=(render_scroll))
                 make_tea = i.update()
                 
-
+            #if it is true it will make tea
                 if make_tea:
                     self.make_tea = True
                     
@@ -106,7 +135,7 @@ class Game:
                         break
 
          
-      
+            #makes tea
             if self.make_tea:
                 tea = Tea(self, 'tea_cup', 'tea',self.tea_pos,(32,32), self.flavor)
                 tea.render(self.display, self.scroll)
@@ -116,9 +145,9 @@ class Game:
 
               
                 
-            timer = self.font.render("timer : " + f"{(':'.join(str(clock).split(':')[1:4]))}", True, (0,0,0))
+           
             
-
+            #handles the player movement logic 
             self.player.update(
                 self.tilemap, 
                 (   
@@ -128,10 +157,18 @@ class Game:
             )
             self.player.render(self.display, offset=render_scroll)
 
-            self.order.update()
-
-            self.order.render(self.display, offset=render_scroll)
+            #calculates and updates points (todo*** -> save high score in json maybe)
             
+            for order in self.orders_made:
+
+                order.render(self.display, offset=render_scroll)
+            
+                order_points = order.update()
+                if order_points:
+                    self.points+=1
+            points = self.font.render(f'tea served: {self.points}', True, (0,0,0))
+            
+            #handles movement buttons and logic
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -174,10 +211,13 @@ class Game:
                         self.space = False
                         print(self.space)
 
-
+            #scale the game 
             self.screen.blit(
                 pygame.transform.scale(self.display, self.screen.get_size()), [0, 0]
             )
+            #shows points
+            self.screen.blit(points, (50,50))
+            #shows timer
             self.screen.blit(timer, (50,30))
             pygame.display.update()
             self.clock.tick(60)

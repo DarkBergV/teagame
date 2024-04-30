@@ -133,7 +133,7 @@ class Editor:
                             self.tile_group = (self.tile_group - 1)% len(self.assets)
                             
 
-                    
+                print(mpos)
 
                     
 
