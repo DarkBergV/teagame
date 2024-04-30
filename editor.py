@@ -23,14 +23,15 @@ class Editor:
         self.assets = {
             'blocks/wood':load_images('blocks/wood'),
             'spawner':load_images('blocks/spawner'),
-            'test':load_images('blocks/test')
+            'test':load_images('blocks/test'),
+            'scenario/carpet':load_images('blocks/scenario')
             
         }
 
         self.tilemap = Tilemap(self, 18)
 
         try:
-            self.tilemap.load('map.json')
+            self.tilemap.load('another_room.json')
         except FileNotFoundError:
             pass
         
@@ -164,7 +165,7 @@ class Editor:
                 elif keys[pygame.K_LSHIFT]:
                     self.shift = True
                 elif keys[pygame.K_o]:
-                    self.tilemap.save('map.json')
+                    self.tilemap.save('another_room.json')
 
                 
 

@@ -25,6 +25,7 @@ class Game:
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
+            'scenario/carpet':load_images('blocks/scenario'),
             'tea/tea_cup/mint':load_image('items/cup/tea_protag_iddle_back1.png'),
             'tea/tea_cup/camomila':load_image('items/cup/tea_cup.png'),
             'tea/chaleira':load_image('items/chaleira/chaleira.png'),
@@ -49,9 +50,11 @@ class Game:
 
     def load_level(self):
         self.tilemap.load('map.json')
-        for wood in self.tilemap.extract([('wood', 1)], keep = True):
-            self.test_spawners.append(pygame.Rect(4 + wood['pos'][0], 4 + wood['pos'][1], 23, 13))
+        for wood in self.tilemap.extract([('blocks/wood', 0)], keep = True):
+            self.test_spawners.append(pygame.Rect(4 + wood['pos'][0], 4 + wood['pos'][1], 13, 13))
         
+        for carpet in self.tilemap.extract([('scenario/carpet',0)], keep = True):
+            self.test_spawners.append(pygame.Rect(4 + carpet['pos'][0], 4 + carpet['pos'][1], 20, 20))
         for spawner in self.tilemap.extract([('spawner',0),('spawner',1), ('spawner',2), ('spawner',3)]):
             
             if spawner['variant'] == 0:
@@ -100,8 +103,8 @@ class Game:
                     if len(self.items) == 0:
                         break
 
-            print(len(self.items))
-
+         
+      
             if self.make_tea:
                 tea = Tea(self, 'tea_cup', self.tea_pos,(32,32), self.flavor)
                 tea.render(self.display, self.scroll)

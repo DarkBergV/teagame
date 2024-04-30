@@ -199,7 +199,7 @@ class Flower(MovableObject):
                     if j.pos == self.pos:
                         self.game.items.remove(j)
                 if self.e_type in TEA_FLAVORS:
-                    print(self.e_type)
+                
                     self.game.flavor = self.e_type
                 if item.e_type in TEA_FLAVORS:
                     self.game.flavor = item.e_type
@@ -230,7 +230,6 @@ class Tea(MovableObject):
         self.img = self.game.assets["tea/" + self.e_type + "/" + self.flavor].copy()
         rect = self.pos
         surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
-
 
 
 

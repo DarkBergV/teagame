@@ -24,7 +24,7 @@ class Tilemap:
                     self.offgrid_tiles.remove(tile)
 
         for loc in self.tilemap:
-            print(count)
+           
             tile = self.tilemap[loc]
             count+=1
             if (tile["type"], tile["variant"]) in id_pairs:
@@ -34,7 +34,7 @@ class Tilemap:
                 matches[-1]["pos"][1] *= self.tile_size
 
                 if not keep:
-                    print(id_pairs)
+                 
                     loc_to_del.append(loc)
         for loc in loc_to_del:
             del self.tilemap[loc]
