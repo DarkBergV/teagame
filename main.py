@@ -58,22 +58,63 @@ class Game:
         self.make_tea = False
         self.num_orders = 3
         self.orders_made = []
+        self.order_flavors = []
+        self.tea_flavors = []
+
+
+        #debugging
+        self.pos_item = []
+        self.pos_chaleira = []
+        #ingrediants list
+        self.ingredients = []
 
         #score items
         self.points = 0
 
         #may use it eventually
         self.space = False
-        
-        self.load_level()
         self.load_order()
+        self.load_level()
+        
+        
 
     def load_order(self):
+       
         for _ in range(self.num_orders):
                 x = random.randrange(201, 244)
                 y = random.randrange(77, 208)
+                
                 flavor = random.choice(ORDERS)
+                self.order_flavors.append(flavor)
+                print(self.order_flavors)
                 self.orders_made.append(Order(self, [x,y], [32,32], flavor))
+        self.load_ingredients()
+                
+                
+        
+
+    def load_ingredients(self):
+        count = 0
+        
+
+        for flavor in self.order_flavors:
+                item_x = random.randrange(101, 150)
+                item_y = random.randrange(67, 172)
+                chaleira_x = random.randrange(101, 150)
+                chaleira_y = random.randrange(67, 172)
+                self.items.append(Flower(self,flavor,'flavor',[item_x, item_y],(32,32)))
+                self.items.append(Flower(self, 'chaleira','chaleira', [chaleira_x, chaleira_y],(32,32)))
+                print("item_location: ", [item_x, item_y], flavor)
+                print("chaleira_location: ", [chaleira_x, chaleira_y], flavor)
+                count+=1
+        self.pos_item.append([item_x, item_y])
+        self.pos_chaleira.append([chaleira_x, chaleira_y])
+
+                
+        print(count)
+        print(self.pos_item)
+        print(self.pos_chaleira)
+                
 
     def load_level(self):
         self.tilemap.load('map.json')
@@ -84,26 +125,24 @@ class Game:
             self.test_spawners.append(pygame.Rect(4 + carpet['pos'][0], 4 + carpet['pos'][1], 20, 20))
         for spawner in self.tilemap.extract([('spawner',0),('spawner',1), ('spawner',2), ('spawner',3)]):
             
-            if spawner['variant'] == 0:
-                
-                self.items.append(Flower(self,'camomila','flavor', spawner["pos"], (32,32)))
-            if spawner['variant'] == 1:
-                
-                self.items.append(Flower(self,'chaleira','chaleira', spawner["pos"], (30,32)))
             
-            
-            if spawner['variant'] == 2:
-                self.items.append(Flower(self,'mint','flavor', spawner["pos"], (30,32)))
 
             if spawner['variant'] == 3:
                 self.player.pos = spawner["pos"]
+
+       
+
                 
                 
 
 
     def run(self):
+
         while self.running:
+            #print(len(self.items))
+           
             #time logic
+          
             timepassed = pygame.time.get_ticks()
             
             clock = datetime.timedelta(seconds=(240 - (timepassed//1000)))
@@ -131,9 +170,7 @@ class Game:
                 if make_tea:
                     self.make_tea = True
                     
-                    if len(self.items) == 0:
-                        break
-
+                    
          
             #makes tea
             if self.make_tea:
@@ -166,6 +203,13 @@ class Game:
                 order_points = order.update()
                 if order_points:
                     self.points+=1
+                    self.orders_made.remove(order)
+                    print(len(self.orders_made))
+                    
+
+            if len(self.orders_made) <=0:
+                self.load_order()
+              
             points = self.font.render(f'tea served: {self.points}', True, (0,0,0))
             
             #handles movement buttons and logic

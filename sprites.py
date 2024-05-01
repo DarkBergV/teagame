@@ -263,7 +263,7 @@ class Order(pygame.sprite.Sprite):
 
                 self.game.tea_pos = item.pos
                 return True
-    
+                
 
     def render(self, surf, offset = (0,0)):
         self.img = self.game.assets['order/' + self.flavor].copy()
