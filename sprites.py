@@ -133,25 +133,26 @@ class Player(PhysicsEntity):
     def update(self, tilemap, movement = (0,0)):
         
         
-
-        if movement[0] > 0:
+        if movement[0] > 0 and movement[1] == 0:
             self.set_action('side_walk_left')
-        elif movement[0] < 0:
-            self.set_action('side_walk_right')
-        if movement[1] < 0:
+        elif movement[0] < 0 and movement[1] == 0:
+            self.set_action('side_walk_left')
+
+        elif movement[1] < 0 and movement[0] == 0:
             self.set_action('walk_back')
             self.back = True
-
-        elif movement[1] > 0:
+        
+        elif movement[1] > 0 and movement[0] == 0:
             self.set_action('walk')
             self.back = False
-    
         
-        elif movement[1] == 0 and not self.back or movement[0] == 0:
+        
+        elif movement[1] == 0 and not self.back or movement[0] == 0 and not self.back:
             self.set_action('iddle')
-
-        elif movement[1] == 0 and self.back:
+        
+        elif movement[1] == 0 and self.back or movement[0] == 0 and self.back:
             self.set_action('iddle_back')
+        
 
         
 
