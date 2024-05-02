@@ -85,10 +85,18 @@ class Game:
                 y = random.randrange(77, 208)
                 
                 flavor = random.choice(ORDERS)
+                item_x = random.randrange(-5,219 )
+                item_y = random.randrange(90, 167 )
+                chaleira_x = random.randrange(-5,219 )
+                chaleira_y = random.randrange(-54,24 )
+                self.items.append(Flower(self,flavor,'flavor',[item_x, item_y],(32,32)))
+                self.items.append(Flower(self, 'chaleira','chaleira', [chaleira_x, chaleira_y],(32,32)))
+              
+                
                 self.order_flavors.append(flavor)
-                print(self.order_flavors)
+            
                 self.orders_made.append(Order(self, [x,y], [32,32], flavor))
-        self.load_ingredients()
+    
                 
                 
         
@@ -98,22 +106,20 @@ class Game:
         
 
         for flavor in self.order_flavors:
-                item_x = random.randrange(101, 150)
-                item_y = random.randrange(67, 172)
-                chaleira_x = random.randrange(101, 150)
-                chaleira_y = random.randrange(67, 172)
+                item_x = random.randrange(-5,219 )
+                item_y = random.randrange(90, 167 )
+                chaleira_x = random.randrange(-5,219 )
+                chaleira_y = random.randrange(-54,24 )
                 self.items.append(Flower(self,flavor,'flavor',[item_x, item_y],(32,32)))
                 self.items.append(Flower(self, 'chaleira','chaleira', [chaleira_x, chaleira_y],(32,32)))
-                print("item_location: ", [item_x, item_y], flavor)
-                print("chaleira_location: ", [chaleira_x, chaleira_y], flavor)
+              
                 count+=1
+           
         self.pos_item.append([item_x, item_y])
         self.pos_chaleira.append([chaleira_x, chaleira_y])
 
                 
-        print(count)
-        print(self.pos_item)
-        print(self.pos_chaleira)
+      
                 
 
     def load_level(self):
@@ -139,10 +145,14 @@ class Game:
     def run(self):
 
         while self.running:
+           
+            
+            
             #print(len(self.items))
            
             #time logic
           
+
             timepassed = pygame.time.get_ticks()
             
             clock = datetime.timedelta(seconds=(240 - (timepassed//1000)))
@@ -162,11 +172,11 @@ class Game:
 
             #displays ingrediants for making tea
             for i in self.items:
-                
+               
                 i.render(self.display, offset=(render_scroll))
                 make_tea = i.update()
                 
-            #if it is true it will make tea
+        #if it is true it will make tea
                 if make_tea:
                     self.make_tea = True
                     
@@ -178,7 +188,7 @@ class Game:
                 tea.render(self.display, self.scroll)
                 self.items.append(tea)
                 self.make_tea = False
-
+              
 
               
                 
@@ -193,7 +203,7 @@ class Game:
                 )
             )
             self.player.render(self.display, offset=render_scroll)
-
+            print('player_position:',self.player.pos)
             #calculates and updates points (todo*** -> save high score in json maybe)
             
             for order in self.orders_made:
@@ -204,9 +214,9 @@ class Game:
                 if order_points:
                     self.points+=1
                     self.orders_made.remove(order)
-                    print(len(self.orders_made))
+                
                     
-
+           
             if len(self.orders_made) <=0:
                 self.load_order()
               
@@ -253,7 +263,7 @@ class Game:
                     
                     elif event.key == pygame.K_SPACE:
                         self.space = False
-                        print(self.space)
+             
 
             #scale the game 
             self.screen.blit(

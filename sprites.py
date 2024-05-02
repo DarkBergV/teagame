@@ -156,18 +156,18 @@ class Player(PhysicsEntity):
             if self.rect().colliderect(rect):
                 if self.mov[0] > 0:
                     self.pos[0] = rect.left - self.rect().width
-                    tea.pos[0] +=0.5
+                    tea.pos[0] +=2
 
                 elif self.mov[0] < 0:
                     self.pos[0] = rect.right
-                    tea.pos[0] -=0.5   
+                    tea.pos[0] -=2 
                     
                 if self.mov[1] > 0:
                     self.pos[1] = rect.top - self.rect().height  
-                    tea.pos[1] +=0.5  
+                    tea.pos[1] +=2 
                 elif self.mov[1] < 0:
                     self.pos[1] = rect.bottom
-                    tea.pos[1] -=0.5
+                    tea.pos[1] -=2
 
 
                 
@@ -188,7 +188,7 @@ class Flower(MovableObject):
     def __init__(self,game,e_type,item_type, pos, size):
         super().__init__(game,e_type,item_type, pos, size)
     def move_item(self):
-        print(self.game.player.rect())
+        
         
         self.pos[0] += 1
 
@@ -197,11 +197,13 @@ class Flower(MovableObject):
         
         for item in items:
             
-            if self.rect().colliderect(item.rect()) and self.e_type != item.e_type and self.e_type in ITEM_MAKER and self.e_type in ITEM_MAKER and self.item_type != item.item_type and self.item_type in ITEM_LIST and item.item_type in ITEM_LIST:
+            if self.rect().colliderect(item.rect()) and self.e_type != item.e_type and self.e_type in ITEM_MAKER and self.e_type in ITEM_MAKER and self.item_type != item.item_type and self.item_type in ITEM_LIST and item.item_type in ITEM_LIST and self.item_type != 'tea_cup' and self.item_type!="tea_cup":
                 
                 self.game.items.remove(item)
                 for j in self.game.items:
-                    if j.pos == self.pos:
+                    
+                    if j.pos == self.pos and j.e_type == self.e_type and j.item_type == self.item_type:
+                       
                         self.game.items.remove(j)
                 if self.e_type in TEA_FLAVORS:
                 
@@ -236,6 +238,9 @@ class Tea(MovableObject):
         rect = self.pos
         surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
 
+    def update(self):
+        return super().update()
+
 
 
 class Order(pygame.sprite.Sprite):
@@ -255,7 +260,7 @@ class Order(pygame.sprite.Sprite):
         for item in items:
             
             if self.rect().colliderect(item.rect()) and  item.item_type == 'tea' and item.flavor == self.flavor:
-                print("amongus")
+                
                 self.game.items.remove(item)
                 for j in self.game.items:
                     if j.pos == self.pos:
