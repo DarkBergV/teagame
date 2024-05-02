@@ -38,6 +38,8 @@ class Game:
             'player/iddle': Animation(load_images('player/iddle')),
             'player/walk_back': Animation(load_images('player/walk_back')),
             'player/iddle_back': Animation(load_images('player/iddle_back')),
+            'player/side_walk_left':Animation(load_images('player/side_walk_left')),
+            'player/side_walk_right':Animation(load_images('player/side_walk_right')),
         }
 
         #player
