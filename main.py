@@ -5,6 +5,7 @@ from sprites import PhysicsEntity, Player, Flower, Tea, Order
 from utils import load_images, Animation, load_image
 from tilemap import Tilemap
 import datetime
+import json
 WIN_WIDTH = 640
 WIND_HEIGHT = 480
 ORDERS = ['camomila', 'mint']
@@ -72,13 +73,38 @@ class Game:
 
         #score items
         self.points = 0
+        self.high_score = 0
 
         #may use it eventually
         self.space = False
         self.load_order()
         self.load_level()
+        self.load_high_score()
         
         
+    def save_high_score(self, path):
+        if self.points>self.high_score:
+            f = open(path, 'w')
+            json.dump({
+                "high_score": self.points 
+            },
+                f,
+            )
+            f.close()
+        
+
+    def load_high_score(self):
+        try:
+
+            f = open("high_score.json", 'r')
+            high_score = json.load(f)
+            f.close()
+            self.high_score =  high_score['high_score']
+        except json.decoder.JSONDecodeError:
+            print("bruh")
+
+        
+
 
     def load_order(self):
        
@@ -149,6 +175,7 @@ class Game:
         while self.running:
            
             
+           
             
             #print(len(self.items))
            
@@ -157,9 +184,9 @@ class Game:
 
             timepassed = pygame.time.get_ticks()
             
-            clock = datetime.timedelta(seconds=(240 - (timepassed//1000)))
+            clock = datetime.timedelta(seconds=(60 - (timepassed//1000)))
             if ':'.join(str(clock).split(':')[1:4]) == '00:00':
-                
+                self.save_high_score('high_score.json')
                 pygame.quit()
 
             timer = self.font.render("timer : " + f"{(':'.join(str(clock).split(':')[1:4]))}", True, (0,0,0))
@@ -272,9 +299,13 @@ class Game:
                 pygame.transform.scale(self.display, self.screen.get_size()), [0, 0]
             )
             #shows points
-            self.screen.blit(points, (50,50))
+            self.screen.blit(points, (50,60))
             #shows timer
             self.screen.blit(timer, (50,30))
+            if not self.high_score <= 0:
+                player_high_score = self.font.render(f'High score: {self.high_score}',True, (0,0,0))
+                self.screen.blit(player_high_score, (300, 30))
+        
             pygame.display.update()
             self.clock.tick(60)
             
