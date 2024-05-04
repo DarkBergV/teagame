@@ -106,7 +106,7 @@ class Editor:
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        print("up")
+                        
                         self.clicking = True
                         if not self.ongrind:
                             self.tilemap.offgrid_tiles.append({"type": self.tile_list[self.tile_group], "variant": self.tile_variant, "pos": (mpos[0] + self.scroll[0], mpos[1] + self.scroll[1])})
@@ -126,14 +126,14 @@ class Editor:
                             self.tile_variant = (self.tile_variant - 1 ) % len(self.assets[self.tile_list[self.tile_group]])
                     else:
                         if event.button == 4:
-                            print(self.tile_group)
+                           
                             self.tile_group = (self.tile_group + 1) % len(self.assets)  
                             
                         if event.button == 5:
                             self.tile_group = (self.tile_group - 1)% len(self.assets)
                             
 
-                print(mpos)
+            
 
                     
 

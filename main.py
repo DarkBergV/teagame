@@ -1,7 +1,7 @@
 import random
 import pygame
 import sys
-from sprites import PhysicsEntity, Player, Flower, Tea, Order
+from sprites import PhysicsEntity, Player, Flower, Tea, Order, Background
 from utils import load_images, Animation, load_image
 from tilemap import Tilemap
 import datetime
@@ -25,12 +25,13 @@ class Game:
         self.font = pygame.font.Font(None, size = 50)
         self.clock = pygame.time.Clock()
         self.assets = {
+            'background':load_image('background/background_test.png'),
             'order/camomila':load_image('orders/camomila_order.png'),
             'order/mint':load_image('orders/mint_order.png'),
             'order/mix':load_image('orders/mix_order.png'),
             'scenario/carpet':load_images('blocks/scenario'),
-            'tea/tea_cup/mint':load_image('items/cup/tea_protag_iddle_back1.png'),
-            'tea/tea_cup/camomila':load_image('items/cup/tea_cup.png'),
+            'tea/tea_cup/mint':load_image('items/cup/tea_cup_mint.png'),
+            'tea/tea_cup/camomila':load_image('items/cup/tea_cup_camomila.png'),
             'tea/chaleira':load_image('items/chaleira/chaleira.png'),
             'tea/camomila':load_image('items/tea/camomila.png'),
             'tea/mint':load_image('items/tea/mint.png'),
@@ -41,6 +42,7 @@ class Game:
             'player/iddle_back': Animation(load_images('player/iddle_back')),
             'player/side_walk_left':Animation(load_images('player/side_walk_left')),
             'player/side_walk_right':Animation(load_images('player/side_walk_right')),
+           
         }
 
         #player
@@ -75,12 +77,19 @@ class Game:
         self.points = 0
         self.high_score = 0
 
+        #time_test
+        self.time = 100
         #may use it eventually
         self.space = False
         self.load_order()
         self.load_level()
         self.load_high_score()
+        #backgorund
+        self.x = 0
+        self.background_image = self.assets['background'].convert()
+            #display logic
         
+        self.background = Background(self,(0,0), self.assets['background'])
         
     def save_high_score(self, path):
         if self.points>self.high_score:
@@ -101,7 +110,9 @@ class Game:
             f.close()
             self.high_score =  high_score['high_score']
         except json.decoder.JSONDecodeError:
-            print("bruh")
+            pass
+        except FileNotFoundError:
+            pass
 
         
 
@@ -177,33 +188,36 @@ class Game:
             
            
             
-            #print(len(self.items))
+            
            
             #time logic
           
 
             timepassed = pygame.time.get_ticks()
             
-            clock = datetime.timedelta(seconds=(60 - (timepassed//1000)))
+            clock = datetime.timedelta(seconds=(self.time - (timepassed//1000)))
             if ':'.join(str(clock).split(':')[1:4]) == '00:00':
                 self.save_high_score('high_score.json')
                 pygame.quit()
 
             timer = self.font.render("timer : " + f"{(':'.join(str(clock).split(':')[1:4]))}", True, (0,0,0))
-
-            #display logic
-            self.display.fill((155, 155, 155))
+            
+            
+           
+            self.background.render(self.display, offset=self.scroll)
             self.tilemap.render(self.display, offset=self.scroll)
             self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0] )/ 30
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1] )/ 30
 
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
+            
+            
 
             #displays ingrediants for making tea
             for i in self.items:
                
                 i.render(self.display, offset=(render_scroll))
-                make_tea = i.update()
+                make_tea = i.update(self.tilemap)
                 
         #if it is true it will make tea
                 if make_tea:
@@ -232,7 +246,7 @@ class Game:
                 )
             )
             self.player.render(self.display, offset=render_scroll)
-            print('player_position:',self.player.pos)
+            
             #calculates and updates points (todo*** -> save high score in json maybe)
             
             for order in self.orders_made:
@@ -247,6 +261,8 @@ class Game:
                     
            
             if len(self.orders_made) <=0:
+                self.num_orders+=1
+                self.time+=30
                 self.load_order()
               
             points = self.font.render(f'tea served: {self.points}', True, (0,0,0))
@@ -254,10 +270,11 @@ class Game:
             #handles movement buttons and logic
 
             for event in pygame.event.get():
+                keys = pygame.key.get_pressed()
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit
-                keys = pygame.key.get_pressed()
+                    sys.exit()
+                
             
                 
                 
@@ -296,7 +313,7 @@ class Game:
 
             #scale the game 
             self.screen.blit(
-                pygame.transform.scale(self.display, self.screen.get_size()), [0, 0]
+                pygame.transform.scale(self.display, self.screen.get_size()), (0, 0)
             )
             #shows points
             self.screen.blit(points, (50,60))

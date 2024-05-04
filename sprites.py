@@ -1,16 +1,26 @@
 from os import remove
 from pkgutil import iter_modules
 import pygame
+WIN_WIDTH = 640
+WIN_HEIGHT = 480
 
 
-ITEM_MAKER = ['camomila', 'chaleira', 'mint']
 
-TEA_FLAVORS = ['camomila', 'mint']
+ITEM_MAKER = ["camomila", "chaleira", "mint"]
 
-ITEM_LIST = ['flavor', 'chaleira']
+TEA_FLAVORS = ["camomila", "mint"]
+
+ITEM_LIST = ["flavor", "chaleira"]
+
 
 class PhysicsEntity(pygame.sprite.Sprite):
-    def __init__(self, game, e_type, pos, size, ):
+    def __init__(
+        self,
+        game,
+        e_type,
+        pos,
+        size,
+    ):
         self.game = game
         self.pos = pos
         self.size = size
@@ -20,17 +30,17 @@ class PhysicsEntity(pygame.sprite.Sprite):
         self.flip = False
         self.display = pygame.surface.Surface(self.size)
         self.display.fill((198, 55, 32))
-        self.action = ''
-        self.set_action('walk')
+        self.action = ""
+        self.set_action("walk")
         self.back = False
-      
-        
-        self.anim_offset = (-3,-3)
-        self.mov= [0,0]
+
+        self.anim_offset = (-3, -3)
+        self.mov = [0, 0]
+
     def set_action(self, action):
         if action != self.action:
             self.action = action
-            self.animation = self.game.assets[self.type +"/"+self.action].copy()
+            self.animation = self.game.assets[self.type + "/" + self.action].copy()
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
@@ -41,51 +51,41 @@ class PhysicsEntity(pygame.sprite.Sprite):
             movement[1] + self.velocity[1],
         ]
 
-        self.mov[0] =  frame_movement[0]
-        self.mov[1] =  frame_movement[1]
+        self.mov[0] = frame_movement[0]
+        self.mov[1] = frame_movement[1]
 
         entity_rect = self.rect()
-        
+
         self.pos[0] += frame_movement[0]
         for rect in tilemap.physics_rect_around(self.pos):
-            
+
             if entity_rect.colliderect(rect):
                 if frame_movement[0] < 0:
-                    #self.pos[0] = entity_rect.x
-                    #self.pos[1] = self.pos[1]
-                    
+                    # self.pos[0] = entity_rect.x
+                    # self.pos[1] = self.pos[1]
+
                     entity_rect.left = rect.right - entity_rect.width
-               
-                if frame_movement[0]>0:
-                    
-                    entity_rect.right = rect.left 
-             
+
+                if frame_movement[0] > 0:
+
+                    entity_rect.right = rect.left
 
             self.pos[0] = entity_rect.x
 
-
-                
         entity_rect_y = self.rect()
         self.pos[1] += frame_movement[1]
-        
 
         for rect in tilemap.physics_rect_around(self.pos):
-            
+
             if entity_rect_y.colliderect(rect):
-                
-                
-                if frame_movement[1]>0:
+
+                if frame_movement[1] > 0:
                     entity_rect_y.bottom = rect.top
 
-                if frame_movement[1]<0:
+                if frame_movement[1] < 0:
                     entity_rect_y.top = rect.bottom
 
             self.pos[1] = entity_rect_y.y
-                    
-                    
-                    
-
-                
 
         if movement[0] > 0:
             self.flip = True
@@ -96,9 +96,13 @@ class PhysicsEntity(pygame.sprite.Sprite):
         self.animation.update()
 
     def render(self, surf, offset=(0, 0)):
-        surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.pos[0] - offset[0] + self.anim_offset[0], self.pos[1] - offset[1]+self.anim_offset[1]))
-
-
+        surf.blit(
+            pygame.transform.flip(self.animation.img(), self.flip, False),
+            (
+                self.pos[0] - offset[0] + self.anim_offset[0],
+                self.pos[1] - offset[1] + self.anim_offset[1],
+            ),
+        )
 
 
 class MovableObject(pygame.sprite.Sprite):
@@ -108,53 +112,83 @@ class MovableObject(pygame.sprite.Sprite):
         self.pos = pos
         self.size = size
         self.item_type = item_type
-        
-
+        self.movement_x = 0
+        self.movement_y = 0
 
     def rect(self):
         return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
-    
 
-    def render(self, surf, offset=(0,0)):
+    def render(self, surf, offset=(0, 0)):
+
         rect = self.rect().center
         self.img = self.game.assets["tea/" + self.e_type].copy()
         rect = self.pos
-        surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]) )
+        surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
 
-    def update(self):
-        pass
+    def update(self, tilemap):
+        entity_rect = self.rect()
+
+        for rect in tilemap.physics_rect_around(self.pos):
+
+            if entity_rect.colliderect(rect):
+                if self.movement_x < 0:
+                    # self.pos[0] = entity_rect.x
+                    # self.pos[1] = self.pos[1]
+
+                    self.pos[0] += 30
+
+                if self.movement_x > 0:
+
+                    self.pos[0] -= 30
+
+        entity_rect_y = self.rect()
+
+        for rect in tilemap.physics_rect_around(self.pos):
+
+            if entity_rect_y.colliderect(rect):
+
+                if self.movement_y > 0:
+                    self.pos[1] -= 30
+
+                if self.movement_y < 0:
+                    self.pos[1] += 30
 
 
 class Player(PhysicsEntity):
 
-    def __init__(self, game, pos, size,):
-        super().__init__(game, 'player', pos, size,)
+    def __init__(
+        self,
+        game,
+        pos,
+        size,
+    ):
+        super().__init__(
+            game,
+            "player",
+            pos,
+            size,
+        )
 
-    def update(self, tilemap, movement = (0,0)):
-        
-        
+    def update(self, tilemap, movement=(0, 0)):
+
         if movement[0] > 0 and movement[1] == 0:
-            self.set_action('side_walk_left')
+            self.set_action("side_walk_left")
         elif movement[0] < 0 and movement[1] == 0:
-            self.set_action('side_walk_left')
+            self.set_action("side_walk_left")
 
         elif movement[1] < 0 and movement[0] == 0:
-            self.set_action('walk_back')
+            self.set_action("walk_back")
             self.back = True
-        
-        elif movement[1] > 0 and movement[0] == 0:
-            self.set_action('walk')
-            self.back = False
-        
-        
-        elif movement[1] == 0 and not self.back or movement[0] == 0 and not self.back:
-            self.set_action('iddle')
-        
-        elif movement[1] == 0 and self.back or movement[0] == 0 and self.back:
-            self.set_action('iddle_back')
-        
 
-        
+        elif movement[1] > 0 and movement[0] == 0:
+            self.set_action("walk")
+            self.back = False
+
+        elif movement[1] == 0 and not self.back or movement[0] == 0 and not self.back:
+            self.set_action("iddle")
+
+        elif movement[1] == 0 and self.back or movement[0] == 0 and self.back:
+            self.set_action("iddle_back")
 
         tea_rects = [tea for tea in self.game.items]
         for tea in tea_rects:
@@ -162,57 +196,69 @@ class Player(PhysicsEntity):
             if self.rect().colliderect(rect):
                 if self.mov[0] > 0:
                     self.pos[0] = rect.left - self.rect().width
-                    tea.pos[0] +=2
+                    tea.pos[0] += 2  # 1
+                    tea.movement_x = 1
 
                 elif self.mov[0] < 0:
                     self.pos[0] = rect.right
-                    tea.pos[0] -=2 
-                    
+                    tea.pos[0] -= 2  # *-1
+                    tea.movement_x = -1
+
                 if self.mov[1] > 0:
-                    self.pos[1] = rect.top - self.rect().height  
-                    tea.pos[1] +=2 
+                    self.pos[1] = rect.top - self.rect().height
+                    tea.pos[1] += 2  # 1
+                    tea.movement_y = 1
                 elif self.mov[1] < 0:
                     self.pos[1] = rect.bottom
-                    tea.pos[1] -=2
+                    tea.pos[1] -= 2  # -1
+                    tea.movement_y = -1
 
-
-                
-                
-        
         super().update(tilemap, movement=movement)
-    
+
     def collect_items(self):
         tea_rects = [tea for tea in self.game.items]
         for item in tea_rects:
             item.move_item()
-            
-
-
 
 
 class Flower(MovableObject):
-    def __init__(self,game,e_type,item_type, pos, size):
-        super().__init__(game,e_type,item_type, pos, size)
+    def __init__(self, game, e_type, item_type, pos, size):
+        super().__init__(game, e_type, item_type, pos, size)
+
     def move_item(self):
-        
-        
+
         self.pos[0] += 1
 
-    def update(self):
+    def update(self, tilemap):
+
         items = [item for item in self.game.items]
-        
+
         for item in items:
-            
-            if self.rect().colliderect(item.rect()) and self.e_type != item.e_type and self.e_type in ITEM_MAKER and self.e_type in ITEM_MAKER and self.item_type != item.item_type and self.item_type in ITEM_LIST and item.item_type in ITEM_LIST and self.item_type != 'tea_cup' and self.item_type!="tea_cup":
-                
+
+            if (
+                self.rect().colliderect(item.rect())
+                and self.e_type != item.e_type
+                and self.e_type in ITEM_MAKER
+                and self.e_type in ITEM_MAKER
+                and self.item_type != item.item_type
+                and self.item_type in ITEM_LIST
+                and item.item_type in ITEM_LIST
+                and self.item_type != "tea_cup"
+                and self.item_type != "tea_cup"
+            ):
+
                 self.game.items.remove(item)
                 for j in self.game.items:
-                    
-                    if j.pos == self.pos and j.e_type == self.e_type and j.item_type == self.item_type:
-                       
+
+                    if (
+                        j.pos == self.pos
+                        and j.e_type == self.e_type
+                        and j.item_type == self.item_type
+                    ):
+
                         self.game.items.remove(j)
                 if self.e_type in TEA_FLAVORS:
-                
+
                     self.game.flavor = self.e_type
                 if item.e_type in TEA_FLAVORS:
                     self.game.flavor = item.e_type
@@ -220,53 +266,49 @@ class Flower(MovableObject):
                 self.game.tea_pos = item.pos
                 return True
 
-        super().update()
-    
-
-
-        
-       
+        super().update(tilemap)
 
 
 class Tea(MovableObject):
-    def __init__(self, game, e_type,item_type, pos, size, flavor):
-        super().__init__(game, e_type,item_type, pos, size)
+    def __init__(self, game, e_type, item_type, pos, size, flavor):
+        super().__init__(game, e_type, item_type, pos, size)
         self.flavor = flavor
 
-      
-
-    
-    
-    def render(self, surf, offset=(0,0)):
+    def render(self, surf, offset=(0, 0)):
         rect = self.rect().center
-        
+
         self.img = self.game.assets["tea/" + self.e_type + "/" + self.flavor].copy()
         rect = self.pos
         surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
 
-    def update(self):
-        return super().update()
-
+    def update(self, tilemap):
+        return super().update(tilemap)
 
 
 class Order(pygame.sprite.Sprite):
-    def __init__(self,game,pos, size, flavor):
+    def __init__(self, game, pos, size, flavor):
         self.game = game
         self.pos = pos
         self.size = size
         self.flavor = flavor
 
     def rect(self):
-        
-        return pygame.rect.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1]).copy()
-    
+
+        return pygame.rect.Rect(
+            self.pos[0], self.pos[1], self.size[0], self.size[1]
+        ).copy()
+
     def update(self):
         items = [item for item in self.game.items]
-        
+
         for item in items:
-            
-            if self.rect().colliderect(item.rect()) and  item.item_type == 'tea' and item.flavor == self.flavor:
-                
+
+            if (
+                self.rect().colliderect(item.rect())
+                and item.item_type == "tea"
+                and item.flavor == self.flavor
+            ):
+
                 self.game.items.remove(item)
                 for j in self.game.items:
                     if j.pos == self.pos:
@@ -274,14 +316,30 @@ class Order(pygame.sprite.Sprite):
 
                 self.game.tea_pos = item.pos
                 return True
-                
 
-    def render(self, surf, offset = (0,0)):
-        self.img = self.game.assets['order/' + self.flavor].copy()
+    def render(self, surf, offset=(0, 0)):
+        self.img = self.game.assets["order/" + self.flavor].copy()
         rect = self.rect()
-        surf.blit(self.img, (rect[0]-offset[0], rect[1] - offset[1]))
+        surf.blit(self.img, (rect[0] - offset[0], rect[1] - offset[1]))
 
+
+
+
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self,game, pos, img):
+        self.game = game
+        self.pos = pos
+        self.img = img.convert()
+
+
+    def rect(self):
+        return self.img.get_rect()
     
+    def render(self, surf, offset = (0,0)):
+        rect = self.rect()
+        surf.blit(self.img, rect)
+
 
 
         
